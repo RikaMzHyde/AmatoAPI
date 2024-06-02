@@ -20,14 +20,6 @@ const { Pool } = require('pg');
 });*/
 
 console.log('Starting server...');
-console.log('Environment Variables:', {
-  DATABASE_USER: process.env.DATABASE_USER,
-  DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
-  DATABASE_HOST: process.env.DATABASE_HOST,
-  DATABASE_PORT: process.env.DATABASE_PORT,
-  DATABASE_NAME: process.env.DATABASE_NAME,
-  DATABASE_SSL_CA: process.env.DATABASE_SSL_CA ? '[CA provided]' : '[No CA]'
-});
 // SERVER
 const config = {
   user: process.env.DATABASE_USER,
