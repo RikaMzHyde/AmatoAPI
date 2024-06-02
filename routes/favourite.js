@@ -17,6 +17,47 @@ router.get('/isFavourite', async function(req, res, next) {
       next(err);
     }
   });
+
+// Get favorites list
+router.get('/list_product', async function(req, res, next) {
+  const pool = req.app.get('db');
+  const { userId } = req.query;  // Extract userId from query string
+
+  try {
+    const query = `
+      SELECT p.*, 'Product' as type
+      FROM Favourite f
+      JOIN Product p ON f.productId = p.id
+      WHERE f.userId = $1
+    `;
+
+    const result = await pool.query(query, [userId]);
+
+    res.json(result.rows);
+  } catch (err) {
+    next(err);
+  }
+});
+// Get favorites list
+router.get('/list_pack', async function(req, res, next) {
+  const pool = req.app.get('db');
+  const { userId } = req.query;  // Extract userId from query string
+
+  try {
+    const query = `
+      SELECT p.*, 'Pack' as type
+      FROM Favourite f
+      JOIN Pack p ON f.productId = p.id
+      WHERE f.userId = $1
+    `;
+
+    const result = await pool.query(query, [userId]);
+
+    res.json(result.rows);
+  } catch (err) {
+    next(err);
+  }
+});
   
   // Add a product to favourites
   router.post('/addFavourite', async function(req, res, next) {
