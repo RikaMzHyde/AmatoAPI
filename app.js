@@ -38,6 +38,7 @@ const pool = new Pool(config);
 var productRouter = require('./routes/product');
 var packRouter = require('./routes/pack');
 var favouriteRouter = require('./routes/favourite');
+var orderHistoryRouter = require('./routes/orderHistory');
 
 var app = express();
 
@@ -60,6 +61,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/product', productRouter);
 app.use('/pack', packRouter);
 app.use('/favourite', favouriteRouter);
+app.use('/order_history', orderHistoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
