@@ -4,7 +4,7 @@ var router = express.Router();
 // Check if a product is a favourite
 router.get('/isFavourite', async function(req, res, next) {
     const pool = req.app.get('db');
-    const { productId, type, userId } = req.query;  // Extract parameters from query string
+    const { productId, type, userId } = req.query;
   
     try {
       const result = await pool.query(
@@ -25,10 +25,15 @@ router.get('/list_product', async function(req, res, next) {
 
   try {
     const query = `
-      SELECT p.*, 'Product' as type
+      SELECT p.*, p.type
       FROM Favourite f
-      JOIN Product p ON f.productId = p.id
+      LEFT JOIN (
+        SELECT id, name, description, stock, imagelinksquare, imagelinkportrait, extrainfo, ratingscount, type, index, average_rating FROM product
+        UNION ALL
+        SELECT id, name, description, stock, imagelinksquare, imagelinkportrait, extrainfo, ratingscount, type, index, average_rating FROM pack
+      ) p ON f.productId = p.id
       WHERE f.userId = $1
+      and p.id is not null
     `;
 
     const result = await pool.query(query, [userId]);
@@ -38,6 +43,7 @@ router.get('/list_product', async function(req, res, next) {
     next(err);
   }
 });
+
 // Get favorites list
 router.get('/list_pack', async function(req, res, next) {
   const pool = req.app.get('db');

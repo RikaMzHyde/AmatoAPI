@@ -65,7 +65,8 @@ router.post('/addOrderHistory', async function(req, res, next) {
           UNION ALL
           SELECT size, productid, currency, price FROM pricepack
         ) pr ON ohp.productid = pr.productid AND ohq.size = pr.size
-        WHERE oh.userid = $1`,
+        WHERE oh.userid = $1
+        ORDER BY oh.date DESC`,
         [userId]
       );
   
