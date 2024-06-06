@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
-// Check if a product is a favourite
+// Verificar si un producto es favorito.
 router.get('/isFavourite', async function(req, res, next) {
     const pool = req.app.get('db');
     const { productId, type, userId } = req.query;
@@ -11,17 +11,16 @@ router.get('/isFavourite', async function(req, res, next) {
         'SELECT 1 FROM Favourite WHERE productId = $1 AND type = $2 AND userId = $3',
         [productId, type, userId]
       );
-  
       res.json({ isFavourite: result.rowCount > 0 });
     } catch (err) {
       next(err);
     }
   });
 
-// Get favorites list
+// Obtener lista de favoritos para productos.
 router.get('/list_product', async function(req, res, next) {
   const pool = req.app.get('db');
-  const { userId } = req.query;  // Extract userId from query string
+  const { userId } = req.query;
 
   try {
     const query = `
@@ -44,10 +43,10 @@ router.get('/list_product', async function(req, res, next) {
   }
 });
 
-// Get favorites list
+// Obtener lista de favoritos para packs.
 router.get('/list_pack', async function(req, res, next) {
   const pool = req.app.get('db');
-  const { userId } = req.query;  // Extract userId from query string
+  const { userId } = req.query;
 
   try {
     const query = `
@@ -65,10 +64,10 @@ router.get('/list_pack', async function(req, res, next) {
   }
 });
   
-  // Add a product to favourites
+  // Agregar un producto a favoritos.
   router.post('/addFavourite', async function(req, res, next) {
     const pool = req.app.get('db');
-    const { productId, type, userId } = req.query;  // Extract parameters from query string
+    const { productId, type, userId } = req.query;
   
     try {
       await pool.query(
@@ -81,7 +80,7 @@ router.get('/list_pack', async function(req, res, next) {
     }
   });
   
-  // Remove a product from favourites
+  // Eliminar producto de favoritos.
   router.delete('/removeFavourite', async function(req, res, next) {
     const pool = req.app.get('db');
     const { productId, type, userId } = req.query;

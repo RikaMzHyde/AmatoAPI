@@ -1,11 +1,10 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET pack listing. */
+// Obtener la lista de packs.
 router.get('/', function(req, res, next) {
   const pool = req.app.get('db');
   
-  // Realizamos la consulta a la base de datos
   const query = `
     SELECT Pack.*, json_agg(json_build_object('size', PricePack.size, 'price', PricePack.price, 'currency', PricePack.currency) ORDER BY (PricePack.price::numeric)) as prices
     FROM Pack
@@ -15,17 +14,15 @@ router.get('/', function(req, res, next) {
 
   pool.query(query, (error, results) => {
     if (error) {
-      // Si hay un error, lo pasamos al manejador de errores
       next(error);
     } else {
-      // Si no hay errores, enviamos los resultados como respuesta
       res.json(results.rows);
     }
   });
 });
 
 
-/* GET specific pack by ID. */
+// Obtener pack por ID.
 router.get('/:packId', function(req, res, next) {
     const pool = req.app.get('db');
     const packId = req.params.packId;

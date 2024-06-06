@@ -4,26 +4,24 @@ var router = express.Router();
 // Añadir pedidos al historial de pedidos
 router.post('/addOrderHistory', async function(req, res, next) {
     const pool = req.app.get('db');
-    const { cartList, totalPrice, userId } = req.body;  // Extract CartList, totalPrice, and userId from request body
+    const { cartList, totalPrice, userId } = req.body;
   
     try {
-      // Insert into ORDER_HISTORY and get the generated ORDER_ID
       const result = await pool.query(
         'INSERT INTO ORDER_HISTORY (TOTAL_PRICE, USERID) VALUES ($1, $2) RETURNING ORDER_ID',
         [totalPrice, userId]
       );
       const orderId = result.rows[0].order_id;
   
-      // Insert each item in CartList into ORDER_HISTORY_PRODUCT
       for (let item of cartList) {
-        // Insert into ORDER_HISTORY_PRODUCT and get the generated ID
+        // Insertar en ORDER_HISTORY_PRODUCT y obtener el ID generado
         const productResult = await pool.query(
           'INSERT INTO ORDER_HISTORY_PRODUCT (ORDER_ID, PRODUCTID, TYPE) VALUES ($1, $2, $3) RETURNING ID',
           [orderId, item.id, item.type]
         );
         const orderProductId = productResult.rows[0].id;
   
-        // For each price option in the item, insert into ORDER_HISTORY_QUANTITY
+        // Para cada opción de precio en el artículo, insertar en ORDER_HISTORY_QUANTITY
         for (let priceOption of item.prices) {
           await pool.query(
             'INSERT INTO ORDER_HISTORY_QUANTITY (ORDER_PRODUCT_ID, SIZE, QUANTITY) VALUES ($1, $2, $3)',
@@ -70,13 +68,15 @@ router.post('/addOrderHistory', async function(req, res, next) {
         [userId]
       );
   
-      const rawOrderHistory = result.rows;
+      const rawOrderHistory = result.rows; // Obtener el historial de pedidos sin procesar desde la base de datos.
   
-      const orderHistoryMap = new Map();
+      const orderHistoryMap = new Map(); // Crear un mapa para almacenar los detalles del historial de pedidos.
   
+      // Recorrer cada fila del historial de pedidos sin procesar.
       rawOrderHistory.forEach(row => {
         const { order_id, OrderDate, CartListPrice, productId, ...productDetails } = row;
   
+        // Verificar si ya se ha creado una entrada para este pedido en el mapa y sino la crea.
         if (!orderHistoryMap.has(order_id)) {
           orderHistoryMap.set(order_id, {
             order_id,
@@ -86,7 +86,9 @@ router.post('/addOrderHistory', async function(req, res, next) {
           });
         }
   
+        // Obtener el objeto del pedido del mapa.
         const order = orderHistoryMap.get(order_id);
+        // Buscar si ya existe un producto en el carrito para este pedido.
         const existingProduct = order.CartList.find(p => p.product.id === productId);
   
         const priceDetail = {
@@ -95,7 +97,8 @@ router.post('/addOrderHistory', async function(req, res, next) {
           price: parseFloat(row.price),
           quantity: row.quantity
         };
-  
+        
+        // Si el producto ya existe, actuliza sus detalles, sino lo agrega como nuevo producto al pedido.
         if (existingProduct) {
           existingProduct.product.prices.push(priceDetail);
           existingProduct.product.ItemPrice += priceDetail.price * priceDetail.quantity;
